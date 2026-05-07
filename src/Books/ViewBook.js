@@ -2,7 +2,7 @@ import React, { useEffect, useState , useCallback} from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 function ViewBook() {
-  const { id } = useParams(); // 🔥 ID depuis URL
+  const { id } = useParams(); 
   const navigate = useNavigate();
 
   const [book, setBook] = useState(null);

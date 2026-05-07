@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function CreateBook() {
   const [title, setTitle] = useState("");
@@ -6,6 +7,7 @@ function CreateBook() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const createBook = async (e) => {
     e.preventDefault(); // Empêche le rechargement de la page
@@ -38,6 +40,8 @@ function CreateBook() {
       
       // Masquer le message de succès après 3 secondes
       setTimeout(() => setShowSuccess(false), 3000);
+      navigate("/books");
+
     } catch (err) {
       setError("Impossible de créer le livre. Vérifiez votre connexion.");
     } finally {

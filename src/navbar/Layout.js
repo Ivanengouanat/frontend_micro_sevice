@@ -1,5 +1,6 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import NotificationBell from "../Notifications/NotificationBell";
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -32,6 +33,11 @@ export default function Layout() {
           <button onClick={() => navigate("/books")} style={styles.button}>
             Livres
           </button>
+          <button onClick={() => navigate("/loans")} style={styles.button}>
+            📚 Emprunts
+          </button>
+          <NotificationBell />
+
 
           {/*  MENU UTILISATEUR */}
           <div style={styles.userMenu} ref={menuRef}>

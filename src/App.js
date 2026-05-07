@@ -7,6 +7,9 @@ import Register from "./Users/Register";
 import Login from "./Users/Login";
 import Profile from "./Users/Profile";
 import Layout from "./navbar/Layout";
+import LoansList from "./Loans/LoansList";
+import BorrowBook from "./Loans/BorrowBook";
+import ReturnBook from "./Loans/ReturnBook";
 
 // Auth check
 const isAuthenticated = () => {
@@ -40,6 +43,9 @@ function App() {
         <Route path="/books/:id" element={<ViewBook />} />
         <Route path="/create" element={<CreateBook />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/loans" element={<LoansList />} />
+<Route path="/loans/borrow" element={<BorrowBook />} />
+<Route path="/loans/return" element={<ReturnBook />} />
       </Route>
     </Routes>
   );

@@ -28,6 +28,7 @@ export default function Login() {
       }
 
      const data = await res.json();
+     console.log("LOGIN DATA =", data);
 
 localStorage.setItem("user", JSON.stringify(data));
 localStorage.setItem("token", "logged"); // juste pour ton PrivateRoute
