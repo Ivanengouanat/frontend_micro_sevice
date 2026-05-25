@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getHistory } from "../Loans/LoanService";
+import { getActiveLoans } from "../Loans/LoanService";
+import { API_BASES, readApiError } from "../utils/api";
 
 function ListBooks() {
   const [books, setBooks] = useState([]);
   const [myLoans, setMyLoans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const BOOKS_API = process.env.REACT_APP_BOOKS_API;
+  const BOOKS_API = API_BASES.books;
 
   const navigate = useNavigate();
 
@@ -21,6 +23,7 @@ function ListBooks() {
     const loadData = async () => {
       try {
         setLoading(true);
+        setError("");
 
         // récupérer les livres
         const booksRes = await fetch(
@@ -29,7 +32,7 @@ function ListBooks() {
 
         if (!booksRes.ok) {
           throw new Error(
-            "Erreur récupération livres"
+            await readApiError(booksRes, "Erreur récupération livres")
           );
         }
 
@@ -44,23 +47,13 @@ function ListBooks() {
 
         // récupérer mes emprunts
         if (userId) {
-          const loans =
-            await getHistory(userId);
-
-          const borrowedOnly =
-            loans.filter(
-              (loan) =>
-                loan.status ===
-                "BORROWED"
-            );
-
-          setMyLoans(
-            borrowedOnly
-          );
+          const loans = await getActiveLoans(userId);
+          setMyLoans(Array.isArray(loans) ? loans : []);
         }
 
       } catch (error) {
         console.error(error);
+        setError(error.message || "Impossible de charger la bibliothèque");
         setBooks([]);
         setMyLoans([]);
       } finally {
@@ -110,6 +103,12 @@ function ListBooks() {
           Ajouter
         </button>
       </div>
+
+      {error && (
+        <div style={styles.error}>
+          {error}
+        </div>
+      )}
 
       {/* EMPTY */}
       {books.length === 0 && (
@@ -260,6 +259,8 @@ function ListBooks() {
                                       {
                                         bookId:
                                           book.id,
+                                        bookTitle:
+                                          book.title,
                                       },
                                   }
                                 )
@@ -352,6 +353,14 @@ const styles = {
     backgroundColor:
       "white",
     borderRadius: "10px",
+  },
+
+  error: {
+    padding: "12px",
+    marginBottom: "16px",
+    borderRadius: "8px",
+    backgroundColor: "#fee2e2",
+    color: "#991b1b",
   },
 
   tableWrapper: {

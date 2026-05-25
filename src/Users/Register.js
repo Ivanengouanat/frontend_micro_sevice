@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { API_BASES, readApiError } from "../utils/api";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -9,13 +10,17 @@ export default function Register() {
   });
 
   const [loading, setLoading] = useState(false);
-   const USERS_API = process.env.REACT_APP_USERS_API;
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const USERS_API = API_BASES.users;
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setMessage("");
+    setError("");
 
     try {
       const res = await fetch(`${USERS_API}/users/register`, {
@@ -25,12 +30,10 @@ export default function Register() {
       });
 
       if (!res.ok) {
-        throw new Error("Erreur lors de l'inscription");
+        throw new Error(await readApiError(res, "Erreur lors de l'inscription"));
       }
 
-    //   const data = await res.json();
-
-      alert("Compte créé avec succès ✅");
+      setMessage("Compte créé avec succès");
 
       // redirection vers login
       navigate("/login");
@@ -39,7 +42,7 @@ export default function Register() {
 
     } catch (error) {
       console.error("Erreur lors de l'inscription:", error);
-      alert(error.message);
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -48,6 +51,8 @@ export default function Register() {
   return (
     <div style={styles.container}>
       <h2>Inscription</h2>
+      {message && <div style={styles.success}>{message}</div>}
+      {error && <div style={styles.error}>{error}</div>}
 
       <form onSubmit={handleSubmit} style={styles.form}>
         <input
@@ -130,5 +135,21 @@ const styles = {
     color: "#3498db",
     textDecoration: "none",
     fontWeight: "bold",
+  },
+  success: {
+    padding: "10px",
+    marginBottom: "12px",
+    borderRadius: "6px",
+    backgroundColor: "#dcfce7",
+    color: "#166534",
+    fontSize: "0.9rem",
+  },
+  error: {
+    padding: "10px",
+    marginBottom: "12px",
+    borderRadius: "6px",
+    backgroundColor: "#fee2e2",
+    color: "#991b1b",
+    fontSize: "0.9rem",
   },
 };

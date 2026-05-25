@@ -51,6 +51,13 @@ function ReturnBook() {
         return;
       }
 
+      if (Number(loanId) < 1) {
+        setMessage(
+          "⚠️ ID invalide"
+        );
+        return;
+      }
+
       try {
         setLoading(true);
 

@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { getNotifications } from "./NotificationService";
+import {
+  getNotifications,
+  getUnreadCount,
+  markNotificationsAsRead,
+} from "./NotificationService";
 
 export default function NotificationBell() {
 
@@ -7,25 +11,30 @@ export default function NotificationBell() {
     useState([]);
 
   const [open, setOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const user = JSON.parse(
     localStorage.getItem("user")
   );
+  const userId = user?.id;
 
   useEffect(() => {
 
-    console.log("USER STORAGE =", user);
-console.log("USER ID =", user?.id);
+    
 
-    if (!user) return;
+    if (!userId) return;
 
     const loadNotifications = async () => {
       try {
 
-        const data =
-          await getNotifications(user.id);
+        const [data, count] =
+          await Promise.all([
+            getNotifications(userId),
+            getUnreadCount(userId),
+          ]);
 
-        setNotifications(data);
+        setNotifications(Array.isArray(data) ? data : []);
+        setUnreadCount(Number(count) || 0);
 
       } catch (err) {
         console.error(err);
@@ -43,10 +52,24 @@ console.log("USER ID =", user?.id);
 
     return () => clearInterval(interval);
 
-  }, [user?.id]);
+  }, [userId]);
 
-  const unreadCount =
-    notifications.length;
+  const toggleOpen = async () => {
+    const nextOpen = !open;
+    setOpen(nextOpen);
+
+    if (nextOpen && userId && unreadCount > 0) {
+      try {
+        await markNotificationsAsRead(userId);
+        setUnreadCount(0);
+        setNotifications((items) =>
+          items.map((item) => ({ ...item, read: true }))
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
 
   return (
     <div style={styles.wrapper}>
@@ -54,7 +77,7 @@ console.log("USER ID =", user?.id);
       {/* BOUTON CLOCHE */}
       <button
         style={styles.bellButton}
-        onClick={() => setOpen(!open)}
+        onClick={toggleOpen}
       >
         🔔
 
@@ -84,7 +107,7 @@ console.log("USER ID =", user?.id);
                 key={notif.id}
                 style={styles.item}
               >
-                <div>
+                <div style={notif.read ? styles.readText : styles.unreadText}>
                   {notif.message}
                 </div>
 
@@ -163,6 +186,14 @@ const styles = {
 
   date: {
     color: "#7f8c8d",
+  },
+
+  unreadText: {
+    fontWeight: "700",
+  },
+
+  readText: {
+    fontWeight: "400",
   },
 
   empty: {

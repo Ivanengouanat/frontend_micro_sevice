@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASES, readApiError } from "../utils/api";
 
 function CreateBook() {
   const [title, setTitle] = useState("");
@@ -20,7 +21,7 @@ function CreateBook() {
 
     setIsSubmitting(true);
     setError("");
-   const BOOKS_API = process.env.REACT_APP_BOOKS_API;
+   const BOOKS_API = API_BASES.books;
 
     try {
       const response = await fetch(`${BOOKS_API}/books`, {
@@ -29,7 +30,7 @@ function CreateBook() {
         body: JSON.stringify({ title, author }),
       });
 
-      if (!response.ok) throw new Error("Erreur lors de la création");
+      if (!response.ok) throw new Error(await readApiError(response, "Erreur lors de la création"));
 
       // const data = await response.json();
       
@@ -43,7 +44,7 @@ function CreateBook() {
       navigate("/books");
 
     } catch (err) {
-      setError("Impossible de créer le livre. Vérifiez votre connexion.");
+      setError(err.message || "Impossible de créer le livre. Vérifiez votre connexion.");
     } finally {
       setIsSubmitting(false);
     }

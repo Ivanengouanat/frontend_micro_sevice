@@ -7,6 +7,7 @@ function BorrowBook() {
   const navigate = useNavigate();
 
   const [bookId, setBookId] = useState("");
+  const [bookTitle, setBookTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -16,6 +17,9 @@ function BorrowBook() {
   useEffect(() => {
     if (location.state?.bookId) {
       setBookId(location.state.bookId);
+    }
+    if (location.state?.bookTitle) {
+      setBookTitle(location.state.bookTitle);
     }
   }, [location.state]);
 
@@ -27,8 +31,9 @@ function BorrowBook() {
       return;
     }
 
-    if (!bookId) {
-      setMessage("⚠️ ID du livre requis");
+    const numericBookId = Number(bookId);
+    if (!numericBookId || numericBookId < 1) {
+      setMessage("⚠️ ID du livre invalide");
       return;
     }
 
@@ -37,7 +42,7 @@ function BorrowBook() {
     try {
       await borrowBook({
         userId: user.id,
-        bookId: Number(bookId),
+        bookId: numericBookId,
       });
 
       setMessage("✅ Livre emprunté !");
@@ -58,12 +63,15 @@ function BorrowBook() {
     <div style={styles.container}>
       <div style={styles.card}>
         <h2>📖 Emprunter un livre</h2>
+        {bookTitle && <p style={styles.subtitle}>{bookTitle}</p>}
 
         <input
           style={styles.input}
           value={bookId}
           onChange={(e) => setBookId(e.target.value)}
           placeholder="ID du livre"
+          type="number"
+          min="1"
         />
 
         <button onClick={handleBorrow} disabled={loading} style={styles.button}>
@@ -99,6 +107,12 @@ const styles = {
   title: {
     marginBottom: "20px",
     color: "#2c3e50",
+  },
+
+  subtitle: {
+    color: "#64748b",
+    marginTop: "-8px",
+    marginBottom: "18px",
   },
 
   input: {

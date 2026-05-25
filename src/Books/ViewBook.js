@@ -1,5 +1,6 @@
 import React, { useEffect, useState , useCallback} from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { API_BASES, readApiError } from "../utils/api";
 
 function ViewBook() {
   const { id } = useParams(); 
@@ -9,7 +10,7 @@ function ViewBook() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const BOOKS_API = process.env.REACT_APP_BOOKS_API;
+  const BOOKS_API = API_BASES.books;
 
   
 
@@ -22,7 +23,7 @@ const fetchBook = useCallback(async () => {
   try {
     const res = await fetch(`${BOOKS_API}/books/${id}`);
 
-    if (!res.ok) throw new Error("Livre introuvable");
+    if (!res.ok) throw new Error(await readApiError(res, "Livre introuvable"));
 
     const data = await res.json();
     setBook(data);
@@ -70,7 +71,12 @@ useEffect(() => {
         <div style={styles.card}>
           <div style={styles.top}>
             <span style={styles.badge}>#{book.id}</span>
-            <span style={styles.status}>Disponible</span>
+            <span style={{
+              ...styles.status,
+              color: book.available ? "#27ae60" : "#c0392b",
+            }}>
+              {book.available ? "Disponible" : "Emprunté"}
+            </span>
           </div>
 
           <h1 style={styles.title}>{book.title}</h1>

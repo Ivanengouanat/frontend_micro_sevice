@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { API_BASES, readApiError } from "../utils/api";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const USERS_API = process.env.REACT_APP_USERS_API;
-
+  const [error, setError] = useState("");
+  const USERS_API = API_BASES.users;
   
 
   const navigate = useNavigate();
@@ -13,8 +14,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    
+    setError("");
 
     try {
       const res = await fetch(`${USERS_API}/users/login`, {
@@ -24,23 +24,19 @@ export default function Login() {
       });
 
       if (!res.ok) {
-        throw new Error("Email ou mot de passe incorrect");
+        throw new Error(await readApiError(res, "Email ou mot de passe incorrect"));
       }
 
-     const data = await res.json();
-     console.log("LOGIN DATA =", data);
+      const data = await res.json();
 
-localStorage.setItem("user", JSON.stringify(data));
-localStorage.setItem("token", "logged"); // juste pour ton PrivateRoute
+      localStorage.setItem("user", JSON.stringify(data.user || data));
+      localStorage.setItem("token", data.token);
 
-      alert("Connexion réussie");
-
-      //  REDIRECTION
       navigate("/books");
 
     } catch (error) {
       console.error("Erreur lors du login:", error);
-      alert(error.message);
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -49,6 +45,7 @@ localStorage.setItem("token", "logged"); // juste pour ton PrivateRoute
   return (
     <div style={styles.container}>
       <h2>Connexion</h2>
+      {error && <div style={styles.error}>{error}</div>}
 
       <form onSubmit={handleSubmit} style={styles.form}>
         <input
@@ -122,5 +119,13 @@ const styles = {
     color: "#3498db",
     textDecoration: "none",
     fontWeight: "bold",
+  },
+  error: {
+    padding: "10px",
+    marginBottom: "12px",
+    borderRadius: "6px",
+    backgroundColor: "#fee2e2",
+    color: "#991b1b",
+    fontSize: "0.9rem",
   },
 };
